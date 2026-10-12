@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/o/:token", "destination": "/api/o/:token" }
+  ],
+  "headers": [
+    {
+      "source": "/api/o/:token",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0, private" },
+        { "key": "Pragma", "value": "no-cache" }
+      ]
+    }
+  ]
+}

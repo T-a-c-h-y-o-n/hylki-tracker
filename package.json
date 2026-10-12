@@ -1,0 +1,13 @@
+{
+  "name": "hylki-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-hosted open-tracking endpoint for the Hylki mail client",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node test/run.mjs"
+  }
+}
