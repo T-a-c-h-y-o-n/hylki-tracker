@@ -272,5 +272,32 @@ console.log('\nhealth');
   globalThis.fetch = realFetch;
 }
 
+console.log('\ncredentials resolve under either naming');
+{
+  // Vercel's Upstash integration injects the older KV_REST_API_* names, so
+  // accepting only Upstash's own names would leave a connected project unable
+  // to reach its database. Both are checked.
+  const savedUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const savedToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  delete process.env.UPSTASH_REDIS_REST_URL;
+  delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  process.env.KV_REST_API_URL = 'http://memory.local';
+  process.env.KV_REST_API_TOKEN = 'test-token';
+
+  const kv = makeRes();
+  await health(makeReq(), kv);
+  check('reaches the store via KV_REST_API_*', kv.payload.ok === true, JSON.stringify(kv.payload));
+
+  delete process.env.KV_REST_API_URL;
+  delete process.env.KV_REST_API_TOKEN;
+  const none = makeRes();
+  await health(makeReq(), none);
+  check('reports missing credentials honestly', none.payload.ok === false, JSON.stringify(none.payload));
+
+  process.env.UPSTASH_REDIS_REST_URL = savedUrl;
+  process.env.UPSTASH_REDIS_REST_TOKEN = savedToken;
+}
+
 console.log(`\n${passed} passed, ${failed} failed\n`);
 process.exit(failed === 0 ? 0 : 1);
