@@ -42,6 +42,18 @@ function parseIds(raw) {
 }
 
 export default async function handler(req, res) {
+  // An unconfigured deployment is an operator problem, not an intruder, and
+  // saying so costs nothing: it keeps "no secret was ever set" from looking
+  // exactly like "a wrong secret was supplied" while somebody is wiring this
+  // up. Nothing about the secret itself is revealed either way.
+  if (!process.env.TRACKER_SECRET) {
+    res.status(503).json({
+      error: 'not_configured',
+      detail: 'TRACKER_SECRET is not set on this deployment',
+    });
+    return;
+  }
+
   if (!sameSecret(suppliedSecret(req), process.env.TRACKER_SECRET)) {
     res.status(401).json({ error: 'unauthorized' });
     return;

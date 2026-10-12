@@ -239,6 +239,18 @@ console.log('\nthe read side is protected');
   check('refuses a wrong key', wrong.statusCode === 401, String(wrong.statusCode));
 }
 
+console.log('\nan unconfigured deployment says so plainly');
+{
+  const saved = process.env.TRACKER_SECRET;
+  delete process.env.TRACKER_SECRET;
+  const res = makeRes();
+  await opens(makeReq({ query: { ids: '<abc@example.com>' } }), res);
+  check('answers 503, not 401', res.statusCode === 503, String(res.statusCode));
+  check('names the missing setting', res.payload.error === 'not_configured', JSON.stringify(res.payload));
+  check('never repeats the secret', !JSON.stringify(res.payload).includes('test-secret'));
+  process.env.TRACKER_SECRET = saved;
+}
+
 console.log('\nthe read side cannot be steered into other keys');
 {
   const res = makeRes();
